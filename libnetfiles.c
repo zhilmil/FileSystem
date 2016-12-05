@@ -66,9 +66,9 @@ int netopen(const char* pathname, int flags)
 	}
 
 	//reading server response
-	char buffer[256];
-	bzero(buffer,256);
-	n = read(sockfd, buffer, 255);
+	char buffer[4];
+	bzero(buffer,4);
+	n = read(sockfd,buffer, 4);
 	
 	if(n<0)
 	{
@@ -77,7 +77,7 @@ int netopen(const char* pathname, int flags)
 	}
 
 	printf("%s\n",buffer);
-	return 0;	
+	return atoi(buffer);	
 }
 
 

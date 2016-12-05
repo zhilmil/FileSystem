@@ -5,6 +5,8 @@
 #include <string.h>
 #include <pthread.h>
 #include<assert.h>
+#include<stdbool.h>
+#include "cache.h"
 
 void *process_input(void *newsockfd);
 
@@ -71,6 +73,7 @@ void *process_input(void *newsockfd){
       		exit(1);
    	}
    
+	
    	printf("Here is the message: %s Len:%d\n",buffer, strlen(buffer));
    
 	//parsing the message
@@ -79,14 +82,26 @@ void *process_input(void *newsockfd){
 	*token = 0;
 	
 	printf("mode:%s, path:%s\n", buffer, path);
-//	TODO check file status and add send code accordingly
-//
-//
-//
-   	n = write(newsockfd,"I got your message",18);
-   
+	
+	bool open = check_open(path);
+
+	//file is open already
+	if(open==1)
+   		n = write(newsockfd,"-1",4);
+   	else
+	{
+		//send file descriptor
+		//TODO update file status
+		char buf[4];
+		int fd = (int)(newsockfd)*(-1);
+		snprintf(buf,4,"%d", fd);
+		n = write(newsockfd,buf,4);
+	}
+		
    	if (n < 0) {
       	perror("ERROR writing to socket");
       	exit(1);
 	}
 }
+
+

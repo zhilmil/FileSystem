@@ -3,11 +3,18 @@
 
 #include<stdio.h>
 #include<unistd.h>
+#include<stdbool.h>
 
 typedef struct{
-	bool open = false;
-	bool status = false;
+	bool open;
+	bool status;
+	char* filename;
+	int fd;
 } md_file;
 
+void init_cache();
+bool check_open(char* filename);
 
-typedef enum
+bool add_file(struct md_file file);
+
+#endif
