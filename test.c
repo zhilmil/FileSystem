@@ -15,8 +15,9 @@ int main() {
 	printf("till here it was safe open call over\n");
 	ssize_t temp =  netread(fd,message,40);
 	printf("%s",message);
-			
+	//netclose(		
 //	printf("file descriptor received,%d",fd);
+//	a
 	return 0;
 }
 

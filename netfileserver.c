@@ -14,6 +14,7 @@
 
 void *process_input(void *newsockfd);
 void netopenserver(void *newsockfd, char* path);
+void netcloseserver(void* newsockfd, char* msg);
 
 int main( int argc, char *argv[] ) {
    int sockfd, newsockfd, portno, clilen;
@@ -95,12 +96,18 @@ void *process_input(void *newsockfd){
 		printf("called open fucntion\n");
 	}
 	
-	printf("buffer value remains same after call %s\n",buffer);
 	if(strcmp(buffer,"read")==0)
 	{
 		netreadserver(newsockfd,path);
 		printf("called read function\n");
 	}
+	
+	if(strcmp(buffer,"close")==0)
+	{
+		netcloseserver(newsockfd,path);
+		printf("called close function");
+	}
+	
 }
 
 void netopenserver(void* newsockfd, char* path)
@@ -197,7 +204,7 @@ void netreadserver(void* newsockfd, char* message)
       	perror("ERROR writing to socket");
       	exit(1);
 	}
-
+}
 void netwriteserver(void* newsockfd, char* message)
 {
 	
@@ -244,4 +251,24 @@ void netwriteserver(void* newsockfd, char* message)
       	exit(1);
 	}
 }
+void netcloseserver(void* newsockfd, char* msg)
+{
+	int fd = atoi(msg);
+	printf("inside close on server and fd %d\n",fd);
+	int n =0;
+
+	int close_return = close(fd);	
+
+	if(close_return<0)
+	{
+		printf("close failed on server\n");
+		n = write(newsockfd,"-1",4);
+	}
+	n = write(newsockfd,"0",4);
+		
+   	if (n < 0) {
+      	perror("ERROR writing to socket");
+      	exit(1);
+	}
 }
+
