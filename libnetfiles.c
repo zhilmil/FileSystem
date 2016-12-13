@@ -8,6 +8,7 @@
 #include<assert.h>
 #include<stdbool.h>
 #include "libnetfiles.h"
+#include <errno.h>
 struct hostent *server;
 
 int netserverinit(char* hostname, int* filemode)
@@ -100,11 +101,16 @@ ssize_t netread(int fildes, void* buf, size_t nbyte)
 	char* path = token+1;
 	*token = 0;
 	int i=0;
-	strcpy(buf,path);
-	printf("buf %s\n",buf);
-	printf("path %s\n",path);
 	printf("%s bytes read by server\n",buffer);
-	return atoi(buffer);	
+	int bytes = atoi(buffer);
+	if(bytes==-1)
+	{
+		int err = atoi(path);
+		errno = err;
+	}
+	else
+	strcpy(buf,path);
+	return bytes;	
 
 }
 
@@ -150,8 +156,14 @@ ssize_t netwrite(int fildes,const void* buf, size_t nbyte)
 	char *token = strchr(buffer,',');
 	char* path = token+1;
 	*token = 0;
-	
-	return atoi(buffer);
+	int bytes = atoi(buffer);
+	if(bytes==-1)
+	{
+		int err = atoi(path);
+		errno = err;
+	}
+
+	return bytes;
 }
 
 
@@ -177,17 +189,28 @@ int netclose(int fd)
 	}
 
 	//reading server response
-	char buffer[4];
-	bzero(buffer,4);
+	char buffer[10];
+	bzero(buffer,10);
 	n = read(sockfd,buffer, 4);
 	
+	//parsing the message to get number of bytes
+	char *token = strchr(buffer,',');
+	char* path = token+1;
+	*token = 0;
+
+	int bytes = atoi(buffer);
+	if(bytes<0)
+	{
+		int err = atoi(path);
+		errno = err;
+	}
 	if(n<0)
 	{
 		perror("Error reading from socket");
 		exit(1);
 	}
 	
-	return atoi(buffer);	
+	return bytes;	
 }
 
 

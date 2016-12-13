@@ -10,10 +10,11 @@ int main() {
 	printf("checked server");
 	printf("opening file");
 	int fd = netopen("testxx4.txt", 0);
+	//int fd = -43;
 	printf("file descriptor received,%d",fd);
-	char* message = "this is what i want to write please work";
+	char* message = "this is what i want to write please workathis is the last message ";
 	printf("till here it was safe open call over\n");
-	ssize_t temp =  netwrite(fd,message,strlen(message));
+	//ssize_t temp =  netwrite(fd,message,strlen(message));
 	//printf("%d",temp);
 	//netclose(fd);
 	char* message1 = malloc(100 *sizeof(char));

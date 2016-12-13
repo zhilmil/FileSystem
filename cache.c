@@ -3,12 +3,12 @@
 #include<stdbool.h>
 #include "cache.h"
 
-md_file cach[10];
+md_file cach[20];
 
 bool check_open(char* filename)
 {
 	int i = 0;
-	for(i=0;i<10;i++)
+	for(i=0;i<20;i++)
 	{
 		if(cach[i].filename !=0 && cach[i].filename == filename)
 		{
@@ -24,7 +24,7 @@ void init_cache() {
 bool check_file_exists(char* filename)
 {
 	int i = 0;
-	for(i=0;i<10;i++)
+	for(i=0;i<20;i++)
 	{
 		if(cach[i].filename == filename)
 		{
@@ -37,7 +37,7 @@ bool check_file_exists(char* filename)
 md_file send_cach_file(char* filename)
 {
 	int i = 0;
-	for(i=0;i<10;i++)
+	for(i=0;i<20;i++)
 	{
 		if(cach[i].filename == filename)
 		{
@@ -48,9 +48,16 @@ md_file send_cach_file(char* filename)
 
 void add_File(md_file file)
 {
+	int i=0;
 	//TODO handle multiple entries to cach
-	cach[0] = file;
-	printf("one  cahc entry edited with client%d and fd %d\n",cach[0].fd_client,cach[0].fileHandler);
+	for(i=0;i<20;i++)
+	{
+		if(cach[i].used == 0)
+		{
+			cach[i] = file;
+		}
+	}
+	
 }
 
 int check_permission(int fd_client) {
@@ -63,9 +70,23 @@ int check_permission(int fd_client) {
 		if(cach[i].fd_client!=0 && cach[i].fd_client == fd_client)
 		{
 			printf("match obtained for cach\n %d,",cach[i].fileHandler );
-
 			return cach[i].fileHandler;
 		}
 	}
 	return -1;
+}
+
+void close_cach(int fd_client)
+{
+	int i = 0;
+	for(i=0;i<20;i++)
+	{
+		if(cach[i].fd_client!=0 && cach[i].fd_client == fd_client)
+		{
+			printf("match obtained for cach\n %d,",cach[i].fd_client);
+			cach[i].used =0;
+			cach[i].open = false;
+		}
+	}
+
 }

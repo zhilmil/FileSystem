@@ -127,6 +127,8 @@ void netopenserver(void* newsockfd, char* path)
 	printf("for read got filename %s\n",file_name);
 	bool isOpened = check_open(file_name);
 	int n;
+	char buf[4];
+	char* sentmessage = malloc(50);
 	//file is open already
 	if(isOpened==1)
    		n = write(newsockfd,"-1",4);
@@ -142,22 +144,25 @@ void netopenserver(void* newsockfd, char* path)
 		if(fileHandler<0)
 		{
 			printf("returned -1 fileHandler for initial open\n");
-
 			printf("error%s",strerror(errno));
-
+			strcpy(sentmessage,"-1");
+			strcat(sentmessage,",");
+			snprintf(buf,4,"%d",errno);
+			strcat(sentmessage,buf);
 		}
-		printf("the filehandler given for client is %d\n for file %s",fileHandler,file_name);
-		file.fileHandler = fileHandler;
-		char buf[4];
-		//assigning client id based on filehandler`:wq!
-		int fd = (int)newsockfd*(-1);
-		file.fd_client = fd;
-		file.open = true;
-		snprintf(buf,4,"%d", fd);
-
-		add_File(file);
-		
-		n = write(newsockfd,buf,4);
+		else{
+			printf("the filehandler given for client is %d\n for file %s",fileHandler,file_name);
+			file.fileHandler = fileHandler;
+			//assigning client id based on filehandler`:wq!
+			int fd = (int)newsockfd*(-1);
+			file.fd_client = fd;
+			file.open = true;
+			snprintf(buf,4,"%d", fd);
+			strcpy(sentmessage,buf);
+			strcat(sentmessage,",");
+			add_File(file);
+		}
+		n = write(newsockfd,sentmessage,5);
 	}
 		
    	if (n < 0) {
@@ -179,8 +184,9 @@ void netreadserver(void* newsockfd, char* message)
 	
 	ssize_t sizeofbuff = atoi(leftovermessage);
 	char buffer[sizeofbuff];
-	
+	char* sentmessage = malloc(50);
 	int n,nwritten=0;
+	char s_nwritten[4];
 	if(fileHandler<0){
 		printf("filehandler returned negative to read\n");
 		n = write(newsockfd,"-1",4);
@@ -193,16 +199,19 @@ void netreadserver(void* newsockfd, char* message)
 		if(nwritten ==-1)
 		{
 			printf("error%s",strerror(errno));
-
+			strcpy(sentmessage,"-1,");
+			snprintf(s_nwritten,4,"%d",errno);
+			strcat(sentmessage,s_nwritten);
 		}
-		char* sentmessage = malloc(50);
-		printf("number of read bytes on server side%d",nwritten);
-		char s_nwritten[4];
-		snprintf(s_nwritten,4,"%d",nwritten);
-		printf("number of read bytes on server in stringside%s",s_nwritten);
-		strcpy(sentmessage,s_nwritten);
-		strcat(sentmessage,",");
-		strcat(sentmessage,buffer);	
+		else
+		{
+			printf("number of read bytes on server side%d",nwritten);
+			snprintf(s_nwritten,4,"%d",nwritten);
+			printf("number of read bytes on server in stringside%s",s_nwritten);
+			strcpy(sentmessage,s_nwritten);
+			strcat(sentmessage,",");
+			strcat(sentmessage,buffer);	
+		}
 		printf("sent message after read call finished %s\n",sentmessage);
 		n = write(newsockfd,sentmessage,strlen(sentmessage)*sizeof(char));
 	}
@@ -233,8 +242,9 @@ void netwriteserver(void* newsockfd, char* message)
 	ssize_t sizeofbuff = (ssize_t)atoi(leftovermessage);
 	printf("now buffer is to be written\n",buffer);
 	printf("size of buffer is size %d\n",sizeofbuff);
-
-	int n,nwritten;
+	char* sentmessage = malloc(40);
+	int n,nwritten=0;
+	char s_nwritten[4];
 	if(fileHandler<0){
 		printf("filehandler returned negative to read\n");
 		n = write(newsockfd,"-1",4);
@@ -246,15 +256,18 @@ void netwriteserver(void* newsockfd, char* message)
 		if(nwritten ==-1)
 		{
 			printf("error%s",strerror(errno));
-
+			strcpy(sentmessage,"-1,");
+			snprintf(s_nwritten,4,"%d",errno);
+			strcat(sentmessage,s_nwritten);
 		}
-		char* sentmessage = malloc(40);
-		printf("number of written bytes on server side%d",nwritten);
-		char s_nwritten[4];
-		snprintf(s_nwritten,4,"%d",nwritten);
-		printf("number of written bytes on server in stringside%s",s_nwritten);
-		strcpy(sentmessage,s_nwritten);
-		strcat(sentmessage,",");	
+		else
+		{	
+			printf("number of written bytes on server side%d",nwritten);
+			snprintf(s_nwritten,4,"%d",nwritten);
+			printf("number of written bytes on server in stringside%s",s_nwritten);
+			strcpy(sentmessage,s_nwritten);
+			strcat(sentmessage,",");
+		}	
 		printf("sent message after write call finished %s\n",sentmessage);
 		n = write(newsockfd,sentmessage,strlen(sentmessage)*sizeof(char));
 	}
@@ -271,14 +284,17 @@ void netcloseserver(void* newsockfd, char* msg)
 	int n =0;
 	int fileHandler = check_permission(fd);
 	int close_return = close(fileHandler);	
-
+	close_cach(fileHandler);
+	char* sentmessage = malloc(40);
+	char s_nwritten[4];
 	if(close_return<0)
 	{
 		printf("close failed on server\n");
-		n = write(newsockfd,"-1",4);
+		strcpy(sentmessage,"-1,");
+		snprintf(s_nwritten,4,"%d",errno);
+		strcat(sentmessage,s_nwritten);
 	}
-	n = write(newsockfd,"0",4);
-		
+	n = write(newsockfd,"0,",4);
    	if (n < 0) {
       	perror("ERROR writing to socket");
       	exit(1);

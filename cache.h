@@ -11,6 +11,7 @@ typedef struct{
 	char* filename;
 	int fd_client;
 	int fileHandler;
+	bool used;
 } md_file;
 
 void init_cache();
