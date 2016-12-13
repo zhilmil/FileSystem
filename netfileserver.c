@@ -107,6 +107,11 @@ void *process_input(void *newsockfd){
 		netcloseserver(newsockfd,path);
 		printf("called close function");
 	}
+	if(strcmp(buffer,"write")==0)
+	{
+		netwriteserver(newsockfd,path);
+		printf("called write function");
+	}
 	
 }
 
@@ -132,7 +137,7 @@ void netopenserver(void* newsockfd, char* path)
 		{
 			file = send_cach_file(file_name); 
 		}	
-		int fileHandler = open(file_name,O_RDWR|O_CREAT);	
+		int fileHandler = open(file_name,O_RDWR);	
 		
 		if(fileHandler<0)
 		{
@@ -144,7 +149,8 @@ void netopenserver(void* newsockfd, char* path)
 		printf("the filehandler given for client is %d\n for file %s",fileHandler,file_name);
 		file.fileHandler = fileHandler;
 		char buf[4];
-		int fd = (int)(newsockfd)*(-1);
+		//assigning client id based on filehandler`:wq!
+		int fd = (int)newsockfd*(-1);
 		file.fd_client = fd;
 		file.open = true;
 		snprintf(buf,4,"%d", fd);
@@ -171,10 +177,10 @@ void netreadserver(void* newsockfd, char* message)
 	int fd = atoi(message);
 	int fileHandler = check_permission(fd);
 	
-	int sizeofbuff = atoi(leftovermessage);
+	ssize_t sizeofbuff = atoi(leftovermessage);
 	char buffer[sizeofbuff];
 	
-	int n,nwritten;
+	int n,nwritten=0;
 	if(fileHandler<0){
 		printf("filehandler returned negative to read\n");
 		n = write(newsockfd,"-1",4);
@@ -182,13 +188,14 @@ void netreadserver(void* newsockfd, char* message)
 	else {
 		printf("number of bytes to bread %d",sizeofbuff);
 		printf("reading with filehandler %d",fileHandler);
-		nwritten = read(fileHandler,&buffer, sizeofbuff);
+		while(nwritten<sizeofbuff && nwritten!=-1)
+		nwritten = read(fileHandler,&buffer, sizeofbuff) + nwritten;
 		if(nwritten ==-1)
 		{
 			printf("error%s",strerror(errno));
 
 		}
-		char* sentmessage = malloc(40);
+		char* sentmessage = malloc(50);
 		printf("number of read bytes on server side%d",nwritten);
 		char s_nwritten[4];
 		snprintf(s_nwritten,4,"%d",nwritten);
@@ -208,7 +215,7 @@ void netreadserver(void* newsockfd, char* message)
 void netwriteserver(void* newsockfd, char* message)
 {
 	
-	printf("inside read on server");
+	printf("inside write on server");
 	//parsing the message
 	char *token = strchr(message,',');
 	char* leftovermessage = token+1;
@@ -217,32 +224,38 @@ void netwriteserver(void* newsockfd, char* message)
 	int fd = atoi(message);
 	int fileHandler = check_permission(fd);
 	
-	int sizeofbuff = atoi(leftovermessage);
-	char buffer[sizeofbuff];
-	
+	printf("leftover message%s\n",leftovermessage);
+	char* token1 = strchr(leftovermessage,',');
+	char* buffer = token1 +1;
+	printf("before token could be 0\n");
+	*token1 = 0;
+	printf("now token is zero %d",*token1);
+	ssize_t sizeofbuff = (ssize_t)atoi(leftovermessage);
+	printf("now buffer is to be written\n",buffer);
+	printf("size of buffer is size %d\n",sizeofbuff);
+
 	int n,nwritten;
 	if(fileHandler<0){
 		printf("filehandler returned negative to read\n");
 		n = write(newsockfd,"-1",4);
 	}
 	else {
-		printf("number of bytes to bread %d",sizeofbuff);
+		printf("number of bytes to be written %d",sizeofbuff);
 		printf("reading with filehandler %d",fileHandler);
-		nwritten = read(fileHandler,&buffer, sizeofbuff);
+		nwritten = write(fileHandler,buffer,sizeofbuff);
 		if(nwritten ==-1)
 		{
 			printf("error%s",strerror(errno));
 
 		}
 		char* sentmessage = malloc(40);
-		printf("number of read bytes on server side%d",nwritten);
+		printf("number of written bytes on server side%d",nwritten);
 		char s_nwritten[4];
 		snprintf(s_nwritten,4,"%d",nwritten);
-		printf("number of read bytes on server in stringside%s",s_nwritten);
+		printf("number of written bytes on server in stringside%s",s_nwritten);
 		strcpy(sentmessage,s_nwritten);
-		strcat(sentmessage,",");
-		strcat(sentmessage,buffer);	
-		printf("sent message after read call finished %s\n",sentmessage);
+		strcat(sentmessage,",");	
+		printf("sent message after write call finished %s\n",sentmessage);
 		n = write(newsockfd,sentmessage,strlen(sentmessage)*sizeof(char));
 	}
 
@@ -256,8 +269,8 @@ void netcloseserver(void* newsockfd, char* msg)
 	int fd = atoi(msg);
 	printf("inside close on server and fd %d\n",fd);
 	int n =0;
-
-	int close_return = close(fd);	
+	int fileHandler = check_permission(fd);
+	int close_return = close(fileHandler);	
 
 	if(close_return<0)
 	{

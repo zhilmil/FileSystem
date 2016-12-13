@@ -68,7 +68,7 @@ ssize_t netread(int fildes, void* buf, size_t nbyte)
 	char* message;
 	char* function = "read,";
 	char s_nbyte[4];
-	snprintf(s_nbyte,4,"%zu", s_nbyte);
+	snprintf(s_nbyte,4,"%zu", nbyte);
 	char s_fildes[4];
 	snprintf(s_fildes,4,"%d", fildes); 
 	
@@ -115,12 +115,10 @@ ssize_t netwrite(int fildes,const void* buf, size_t nbyte)
 	//creating to be sent message
 	char* message;
 	char* function = "write,";
-	char* buff;
-	strncpy(buff, (char*)buf, nbyte); 
 	char s_fildes[4];
 	snprintf(s_fildes,4,"%d", fildes); 
 	char s_nbyte[4];
-	snprintf(s_nbyte,4,"%zu", s_nbyte);
+	snprintf(s_nbyte,4,"%zu", nbyte);
 	
 	//TODO define proper malloc
 	message = malloc(100);
@@ -129,7 +127,7 @@ ssize_t netwrite(int fildes,const void* buf, size_t nbyte)
 	strcat(message, ",");
 	strcat(message,s_nbyte);
 	strcat(message,",");
-	strcat(message,buff);
+	strcat(message,buf);
 	
 	n = write(sockfd, message, strlen(message));
 	
