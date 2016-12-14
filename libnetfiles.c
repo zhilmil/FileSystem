@@ -30,10 +30,12 @@ int netopen(const char* pathname, int flags)
 	// creating to be sent message
 	char* message;
 	char* function = "open,";
-	char* mode = "exclusive,";
+	char* mode[4];
+	snprintf(mode,4,"%d", flags); 
 	message = malloc(strlen(pathname)+20);
 	strcpy(message,function);
 	strcat(message,mode);
+	strcat(message,",");
 	strcat(message,pathname);
 	
 	n = write(sockfd, message, strlen(message));

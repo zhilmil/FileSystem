@@ -125,8 +125,12 @@ void netopenserver(void* newsockfd, char* path)
 	char* file_name = token+1;
 	*token = 0;
 	printf("for read got filename %s\n",file_name);
+	printf("for read mode came %s",path);
+	int flags = atoi(path);
+	//checking mode for access O_RDONLY or O_WRONLY O_RDWR
+
 	bool isOpened = check_open(file_name);
-	int n;
+	int n,fileHandler;
 	char buf[4];
 	char* sentmessage = malloc(50);
 	//file is open already
@@ -139,8 +143,14 @@ void netopenserver(void* newsockfd, char* path)
 		{
 			file = send_cach_file(file_name); 
 		}	
-		int fileHandler = open(file_name,O_RDWR);	
-		
+
+		if(((flags>>2)&1==1)||(((flags>>1)&1==1)&&(flags&1==1)))
+		fileHandler = open(file_name,O_RDWR);	
+		else if ((flags>>1)&1==1)
+		fileHandler = open(file_name,O_WRONLY);
+		else if ((flags&1)==1)
+		fileHandler = open(file_name,O_RDONLY);
+
 		if(fileHandler<0)
 		{
 			printf("returned -1 fileHandler for initial open\n");
@@ -168,7 +178,7 @@ void netopenserver(void* newsockfd, char* path)
    	if (n < 0) {
       	perror("ERROR writing to socket");
       	exit(1);
-	}
+	}	
 }
 void netreadserver(void* newsockfd, char* message)
 {

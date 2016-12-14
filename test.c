@@ -9,7 +9,7 @@ int main() {
 	netserverinit("java.cs.rutgers.edu",&mode);
 	printf("checked server");
 	printf("opening file");
-	int fd = netopen("testxx4.txt", 0);
+	int fd = netopen("testxx4.txt", O_RDWR);
 	//int fd = -43;
 	printf("file descriptor received,%d",fd);
 	char* message = "this is what i want to write please workathis is the last message ";
