@@ -10,6 +10,7 @@
 #include "libnetfiles.h"
 #include <errno.h>
 struct hostent *server;
+int filemode;
 
 int netserverinit(char* hostname, int* filemode)
 {	
@@ -17,6 +18,7 @@ int netserverinit(char* hostname, int* filemode)
    
    if (server == NULL) {
       fprintf(stderr,"ERROR, no such host\n");
+      errno = HOST_NOT_FOUND;
       return -1;
    }
    else
