@@ -2,8 +2,9 @@
 #include<string.h>
 #include<stdbool.h>
 #include "cache.h"
-
+#include "queue.h"
 md_file cach[20];
+queue_t* cach_queue;
 
 bool check_open(char* filename)
 {
@@ -19,6 +20,7 @@ bool check_open(char* filename)
 
 void init_cache() {
 	memset(cach, 0, sizeof(cach));
+	initQueue(cach_queue);
 }
 
 bool check_file_exists(char* filename)
@@ -55,6 +57,10 @@ void add_File(md_file file)
 		if(cach[i].used == 0)
 		{
 			cach[i] = file;
+			struct queueNode_t* node = malloc(sizeof(queueNode_t));
+			node = createNode();
+	//		node->op = file;
+			enque(cach_queue,node);
 		}
 	}
 	

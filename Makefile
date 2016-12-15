@@ -12,8 +12,8 @@ all: $(targets)
        gcc $(properTargets) test.c -o $(OBJDIR)/demo
 
 cache:
-gcc -c $@.c -o $(OBJDIR)/$@.o
+	gcc -c $@.c -o $(OBJDIR)/$@.o
 netfileserver:
-gcc -c $@.c -o $(OBJDIR)/$@.o
+	gcc -c $@.c -o $(OBJDIR)/$@.o
 clean:
-rm -rf $(OBJDIR)
+	rm -rf $(OBJDIR)

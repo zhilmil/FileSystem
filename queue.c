@@ -1,4 +1,5 @@
 #include "queue.h"
+#include "cache.h"
 
 // Initialize
 void initQueue(queue_t* q)
@@ -43,7 +44,7 @@ queueNode_t* deque(queue_t* q)
 	if(!q || !(q->head) || q->size == 0)
 		return NULL;
 
-	// Single node
+	// Siegle node
 	if(q->head == q->tail)
 	{
 		queueNode_t* node = q->head;
@@ -77,7 +78,7 @@ queueNode_t* createNode()
 		return NULL;
 	node->prev = NULL;
 	node->next = NULL;
-	node->thread = NULL;
+	node->op;
 
 	// TODO: Test code
 	//node->thread = (int*)malloc(sizeof(int));

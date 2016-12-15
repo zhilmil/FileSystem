@@ -1,6 +1,6 @@
 #ifndef _QUEUE_H
 #define _QUEUE_H
-
+#include "cache.h"
 #include <stdlib.h>
 
 // RETURN STATUS of APIs
@@ -11,7 +11,7 @@ typedef enum {
 
 // Node structure for a queue
 typedef struct queueNode {
-	void* thread;
+	md_file op;
 	struct queueNode* prev;
 	struct queueNode* next;
 } queueNode_t;
